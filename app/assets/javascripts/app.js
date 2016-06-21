@@ -20549,10 +20549,11 @@ var BASE_URL = "/api/v1";
 
 function all() {
   var page = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+  var per_page = arguments[1];
 
   return $.ajax({
     url: BASE_URL + "/products.json",
-    data: { page: page }
+    data: { page: page, per_page: per_page }
   });
 }
 });
@@ -20624,21 +20625,48 @@ var _ProductsApi = require("../api/ProductsApi");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var List = _react2.default.createClass({
     displayName: "List",
 
     getInitialState: function getInitialState() {
         return {
-            products: []
+            products: [],
+            totalPages: 1,
+            page: 0,
+            shouldUpdate: true
         };
     },
 
-    componentWillMount: function componentWillMount() {
+    fetchData: function fetchData(per_page) {
         var _this = this;
 
-        (0, _ProductsApi.all)().then(function (data) {
-            _this.setState({ products: data.products });
+        (0, _ProductsApi.all)(this.state.page, per_page).then(function (data) {
+            _this.setState({ products: [].concat(_toConsumableArray(_this.state.products), _toConsumableArray(data.products)), shouldUpdate: false, totalPages: data.total_pages });
         });
+    },
+
+    componentWillMount: function componentWillMount() {
+        this.fetchData();
+    },
+
+    componentDidUpdate: function componentDidUpdate(prevState) {
+        if (this.state.shouldUpdate != prevState.shouldUpdate && this.state.page != prevState.page && this.state.shouldUpdate) {
+            this.fetchData();
+        }
+    },
+
+    handleScroll: function handleScroll() {
+        var product = this.refs.products;
+        var page = Number(this.state.page);
+        var visible = Math.floor(this.props.tableHeight / this.props.elementHeight);
+        var total = this.state.products.length;
+        var scrolled = Math.floor(product.scrollTop / this.props.elementHeight);
+
+        if (scrolled >= total - visible && page < this.state.totalPages) {
+            this.setState({ page: page + 1, shouldUpdate: true });
+        }
     },
 
     render: function render() {
@@ -20680,7 +20708,7 @@ var List = _react2.default.createClass({
             ),
             _react2.default.createElement(
                 "div",
-                { style: { height: this.props.tableHeight + "px" }, className: "products" },
+                { style: { height: this.props.tableHeight + "px" }, className: "products", ref: "products", onScroll: this.handleScroll },
                 _react2.default.createElement(
                     "table",
                     { className: "table" },

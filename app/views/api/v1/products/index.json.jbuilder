@@ -5,3 +5,5 @@ json.products @products do |product|
   json.price number_to_currency product.price
   json.active product.active
 end
+
+json.total_pages @total_pages
