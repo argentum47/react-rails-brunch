@@ -4,7 +4,8 @@
   "description": "== README",
   "main": "index.js",
   "scripts": {
-    "start": "node_modules/brunch/bin/brunch build"
+    "start": "node_modules/brunch/bin/brunch build",
+    "watch": "node_modules/brunch/bin/brunch watch"
   },
   "keywords": [],
   "author": "",

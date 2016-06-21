@@ -3,11 +3,12 @@
     <head>
         <title>Products</title>
         <%= stylesheet_link_tag 'application', media: 'all' %>
+        <%= javascript_include_tag 'application' %>
         <%= csrf_meta_tags %>
     </head>
     <body>
         <%= yield %>
-
-        <%= javascript_include_tag 'application' %>
+        <%= javascript_include_tag 'react_application' %>
+        <script>require('src/init.js')</script>
     </body>
 </html>
