@@ -6,6 +6,9 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-10000.times do |i|
-  Product.create({ name: 'Product#{i+1}', sku: [i+1, i+2, i+3, i+4].join(""), price: rand() * 1000, active: i % 21 ? false : true })
+
+ActiveRecord::Base.transaction do
+  3000.times do |i|
+    Product.connection.execute "INSERT INTO products (name, sku, price, active, created_at, updated_at) values (\"Product#{i+1}\", #{i+1}#{i+2}#{i+3}#{i+4}, #{ rand() * 1000}, #{i % 21 ? 0 : 1}, now(), now())"
+  end
 end

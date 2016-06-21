@@ -20538,11 +20538,30 @@ require.register("react/react.js", function(exports, require, module) {
 module.exports = require('./lib/React');
   })();
 });
-require.register("src/List.react.jsx", function(exports, require, module) {
+require.register("src/api/ProductsApi.js", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
+});
+exports.all = all;
+var BASE_URL = "/api/v1";
+
+function all() {
+  var page = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+  return $.ajax({
+    url: BASE_URL + "/products.json",
+    data: { page: page }
+  });
+}
+});
+
+;require.register("src/components/Element.react.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
 });
 
 var _react = require("react");
@@ -20551,16 +20570,129 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var List = _react2.default.createClass({
-  displayName: "List",
+var Element = _react2.default.createClass({
+    displayName: "Element",
 
-  render: function render() {
-    return _react2.default.createElement(
-      "span",
-      null,
-      "List"
-    );
-  }
+    render: function render() {
+        var _props = this.props;
+        var product = _props.product;
+        var i = _props.i;
+
+        var clsname = product.active ? ["odd", "even"][i % 2 ^ 1] : "red";
+
+        return _react2.default.createElement(
+            "tr",
+            { className: clsname, style: { height: this.props.height + "px" } },
+            _react2.default.createElement(
+                "td",
+                null,
+                product.name
+            ),
+            _react2.default.createElement(
+                "td",
+                null,
+                product.sku
+            ),
+            _react2.default.createElement(
+                "td",
+                null,
+                product.price
+            )
+        );
+    }
+});
+
+exports.default = Element;
+});
+
+require.register("src/components/List.react.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _ElementReact = require("./Element.react.jsx");
+
+var _ElementReact2 = _interopRequireDefault(_ElementReact);
+
+var _ProductsApi = require("../api/ProductsApi");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var List = _react2.default.createClass({
+    displayName: "List",
+
+    getInitialState: function getInitialState() {
+        return {
+            products: []
+        };
+    },
+
+    componentWillMount: function componentWillMount() {
+        var _this = this;
+
+        (0, _ProductsApi.all)().then(function (data) {
+            _this.setState({ products: data.products });
+        });
+    },
+
+    render: function render() {
+        var _this2 = this;
+
+        var elements = this.state.products.map(function (p, i) {
+            return _react2.default.createElement(_ElementReact2.default, { key: p.id, i: i, product: p, height: _this2.props.elementHeight });
+        });
+
+        return _react2.default.createElement(
+            "div",
+            { className: "wrapper" },
+            _react2.default.createElement(
+                "table",
+                { className: "table heading" },
+                _react2.default.createElement(
+                    "thead",
+                    null,
+                    _react2.default.createElement(
+                        "tr",
+                        null,
+                        _react2.default.createElement(
+                            "th",
+                            null,
+                            "Name"
+                        ),
+                        _react2.default.createElement(
+                            "th",
+                            null,
+                            "Sku"
+                        ),
+                        _react2.default.createElement(
+                            "th",
+                            null,
+                            "Price"
+                        )
+                    )
+                )
+            ),
+            _react2.default.createElement(
+                "div",
+                { style: { height: this.props.tableHeight + "px" }, className: "products" },
+                _react2.default.createElement(
+                    "table",
+                    { className: "table" },
+                    _react2.default.createElement(
+                        "tbody",
+                        null,
+                        elements
+                    )
+                )
+            )
+        );
+    }
 });
 
 exports.default = List;
@@ -20577,13 +20709,13 @@ var _reactDom = require("react-dom");
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _ListReact = require("./List.react.jsx");
+var _ListReact = require("./components/List.react.jsx");
 
 var _ListReact2 = _interopRequireDefault(_ListReact);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_reactDom2.default.render(_react2.default.createElement(_ListReact2.default, null), document.querySelector("#products_container"));
+_reactDom2.default.render(_react2.default.createElement(_ListReact2.default, { tableHeight: "300", elementHeight: "40" }), document.querySelector("#products_container"));
 });
 
 require.alias("process/browser.js", "process");

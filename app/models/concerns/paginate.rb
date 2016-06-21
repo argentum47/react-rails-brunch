@@ -2,6 +2,8 @@ module Paginate
   extend ActiveSupport::Concern
 
   module ClassMethods
+    attr_accessor :per_page
+
     def paginate(options)
       options = options.dup
       pagenum = pagenum = options.fetch(:page) { raise ArgumentError, ":page parameter required" }
