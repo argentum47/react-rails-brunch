@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160621164225) do
+ActiveRecord::Schema.define(version: 20160623190214) do
 
   create_table "products", force: :cascade do |t|
     t.string   "name",       limit: 255,                                        null: false
@@ -24,5 +24,13 @@ ActiveRecord::Schema.define(version: 20160621164225) do
 
   add_index "products", ["name"], name: "index_products_on_name", using: :btree
   add_index "products", ["sku"], name: "index_products_on_sku", using: :btree
+
+  create_table "users", force: :cascade do |t|
+    t.string "remote_ip",  limit: 255
+    t.string "session_id", limit: 255
+  end
+
+  add_index "users", ["remote_ip"], name: "index_users_on_remote_ip", using: :btree
+  add_index "users", ["session_id"], name: "index_users_on_session_id", using: :btree
 
 end

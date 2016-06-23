@@ -1,4 +1,14 @@
 <h1>Products</h1>
 
-<div id="products_container">
-</div>
+<% if @verified %>
+  <div id="products_container">
+  </div>
+  <%= javascript_include_tag 'react_application' %>
+  <script>require('src/init.js')</script>
+<% else %>
+  <%= @captcha["q"] %>
+  <%= form_tag(verify_path, method: :post) do %>
+    <%= text_field_tag :answer %>
+    <%= submit_tag "verify", class: "btn btn-large btn-primary" %>
+  <% end %>
+<% end %>
