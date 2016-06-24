@@ -10,14 +10,15 @@ const List = React.createClass({
     let visibleStart = Math.floor(scroll / elementHeight);
     let visibleEnd = Math.min(visibleStart + visible, props.products.length - 1);
 
-    let displayStart = Math.max(0, visibleStart - visible * 1.5);
+    let displayStart = Math.max(0, visibleStart - visible * 1.2);
     let displayEnd = Math.min(displayStart + 2 * visible, props.products.length - 1);
 
     return ({
       visibleStart,
       visibleEnd,
       displayStart,
-      displayEnd
+      displayEnd,
+      products: props.products.slice(displayStart, displayEnd)
     })
   },
 
@@ -27,7 +28,7 @@ const List = React.createClass({
     return {
       products: [],
       visibleStart: 0,
-      visibleEnd: this.props.tableHeight,
+      visibleEnd: +this.props.elementHeight,
       displayStart: 0,
       displayEnd: visible * 2
     }
@@ -46,7 +47,7 @@ const List = React.createClass({
   handleScroll: function() {
     let state = this.calculateState(this.props);
 
-    if(this.state.visibleStart >= this.state.displayStart || this.state.visibleEnd <= this.state.displayEnd)
+    if(!(state.visibleStart >= this.state.displayStart && state.visibleEnd <= this.state.displayEnd))
       this.props.onScroll();
 
     this.setState(state);
@@ -54,11 +55,12 @@ const List = React.createClass({
   },
 
   render: function() {
-    let { visibleStart, visibleEnd, displayStart, displayEnd } = this.state;
-    let topHeight = this.state.displayStart *  this.props.elementHeight
-    let bottomHeight = (this.props.products.length - this.state.displayEnd) * this.props.elementHeight
+    let { displayStart, displayEnd } = this.state;
 
-    let elements = this.props.products.slice(displayStart, displayEnd).map((p, i) => <Element key={p.id} i={i} product={p} height={this.props.elementHeight}/>);
+    let topHeight = displayStart *  this.props.elementHeight
+    let bottomHeight = (this.props.products.length - displayEnd) * this.props.elementHeight
+
+    let elements = this.state.products.map((p, i) => <Element key={p.id} i={i} product={p} height={this.props.elementHeight}/>);
 
     return (
       <div style={{ height: `${this.props.tableHeight}px` }} className="products" ref="scrollable" onScroll={this.handleScroll}>
