@@ -40,7 +40,7 @@ class WelcomeController < ApplicationController
   end
 
   def set_cookies(session_id)
-    cookies.signed[:credentials] = { value: session_id, expires: 1.hour.from_now }
+    cookies.signed[:credentials] = { value: session_id, expires: 1.day.from_now }
   end
 
   def verify_user_cookies(ip)
