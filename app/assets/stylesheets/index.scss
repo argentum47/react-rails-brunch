@@ -1,6 +1,72 @@
-// Place all the styles related to the welcome controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.text-center {
+  text-align:center;
+}
+
+.center-container {
+  clear:both;
+  min-width:500px;
+  margin:0px auto;
+  text-align:center;
+  padding:15px;
+  height:240px;
+  position:absolute;
+  top: 50%;
+  left: 50%;
+
+  .inner {
+    position: relative;
+    top: -50%;
+    left: -50%;
+  }
+}
+
+.arrow {
+  text-decoration: none;
+  color: #fff;
+  width: 25px;
+  font-size: 20px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #ccc;
+  padding: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 25px;
+}
+
+.question {
+  font-size: 21px;
+}
+
+.captcha-form {
+  input[type="text"] {
+    padding: 10px;
+    border: none;
+    border-bottom: solid 2px #c9c9c9;
+    transition: border 0.3s;
+    outline: none;
+
+    &:focus {
+      border-bottom: solid 2px #757575;
+    }
+  }
+
+  input[type="submit"] {
+    border: none;
+    background: #1ABC9C;
+    border-radius: 3px;
+    padding: 6px;
+    width: 55px;
+    color: white;
+    vertical-align: bottom;
+    margin-left: 25px;
+  }
+}
 
 #products_container {
   text-align: center;

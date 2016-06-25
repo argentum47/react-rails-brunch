@@ -20544,16 +20544,26 @@ require.register("src/api/ProductsApi.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.all = all;
+exports.getProductsPaginated = getProductsPaginated;
+exports.searchProducts = searchProducts;
 var BASE_URL = "/api/v1";
 
-function all() {
+function getProductsPaginated() {
   var page = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-  var per_page = arguments[1];
+  var search = arguments[1];
 
   return $.ajax({
     url: BASE_URL + "/products.json",
-    data: { page: page, per_page: per_page }
+    data: search ? { page: page, search: search } : { page: page }
+  });
+}
+
+function searchProducts(search) {
+  var page = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+  return $.ajax({
+    url: BASE_URL + "/products.json",
+    data: { search: search, page: page }
   });
 }
 });
@@ -20562,7 +20572,7 @@ function all() {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _react = require("react");
@@ -20572,45 +20582,154 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Element = _react2.default.createClass({
-    displayName: "Element",
+  displayName: "Element",
 
-    render: function render() {
-        var _props = this.props;
-        var product = _props.product;
-        var i = _props.i;
+  render: function render() {
+    var _props = this.props;
+    var product = _props.product;
+    var i = _props.i;
 
-        var clsname = product.active ? ["odd", "even"][i % 2 ^ 1] : "red";
+    var clsname = product.active ? ["odd", "even"][i % 2 ^ 1] : "red";
 
-        return _react2.default.createElement(
-            "tr",
-            { className: clsname, style: { height: this.props.height + "px" } },
-            _react2.default.createElement(
-                "td",
-                null,
-                product.name
-            ),
-            _react2.default.createElement(
-                "td",
-                null,
-                product.sku
-            ),
-            _react2.default.createElement(
-                "td",
-                null,
-                product.price
-            )
-        );
-    }
+    return _react2.default.createElement(
+      "tr",
+      { className: clsname, style: { height: this.props.height + "px" } },
+      _react2.default.createElement(
+        "td",
+        null,
+        product.name
+      ),
+      _react2.default.createElement(
+        "td",
+        null,
+        product.sku
+      ),
+      _react2.default.createElement(
+        "td",
+        null,
+        product.price
+      )
+    );
+  }
 });
 
 exports.default = Element;
+});
+
+require.register("src/components/Grid.react.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _ListReact = require("./List.react.jsx");
+
+var _ListReact2 = _interopRequireDefault(_ListReact);
+
+var _SearchReact = require("./Search.react.jsx");
+
+var _SearchReact2 = _interopRequireDefault(_SearchReact);
+
+var _ProductsApi = require("../api/ProductsApi");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Grid = _react2.default.createClass({
+  displayName: "Grid",
+
+  getInitialState: function getInitialState() {
+    return {
+      search: ""
+    };
+  },
+
+  fetchData: function fetchData() {
+    var _this = this;
+
+    (0, _ProductsApi.getProductsPaginated)(this.props.page, this.state.search).then(function (data) {
+      _this.props.dispatch({
+        type: 'GET_PRODUCTS',
+        payload: data,
+        page: _this.props.page + 1
+      });
+    });
+  },
+
+  componentWillMount: function componentWillMount() {
+    if (!(this.props.products && this.props.products.length)) this.fetchData();
+  },
+
+  handleSearchProducts: function handleSearchProducts(e) {
+    var _this2 = this;
+
+    this.setState({ search: e.target.value });
+
+    (0, _ProductsApi.searchProducts)(e.target.value).then(function (data) {
+      _this2.props.dispatch({
+        type: 'SEARCH_PRODUCTS',
+        payload: data
+      });
+    });
+  },
+
+  handleScroll: function handleScroll() {
+    if (Number(this.props.page) < this.props.totalPages) {
+      this.fetchData();
+    }
+  },
+
+  render: function render() {
+    return _react2.default.createElement(
+      "div",
+      { className: "wrapper" },
+      _react2.default.createElement(_SearchReact2.default, { handleInput: this.handleSearchProducts }),
+      _react2.default.createElement(
+        "table",
+        { className: "table heading" },
+        _react2.default.createElement(
+          "thead",
+          null,
+          _react2.default.createElement(
+            "tr",
+            null,
+            _react2.default.createElement(
+              "th",
+              null,
+              "Name"
+            ),
+            _react2.default.createElement(
+              "th",
+              null,
+              "Sku"
+            ),
+            _react2.default.createElement(
+              "th",
+              null,
+              "Price"
+            )
+          )
+        )
+      ),
+      _react2.default.createElement(_ListReact2.default, _extends({}, this.props, { onScroll: this.handleScroll }))
+    );
+  }
+});
+
+exports.default = Grid;
 });
 
 require.register("src/components/List.react.jsx", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _react = require("react");
@@ -20621,109 +20740,142 @@ var _ElementReact = require("./Element.react.jsx");
 
 var _ElementReact2 = _interopRequireDefault(_ElementReact);
 
-var _ProductsApi = require("../api/ProductsApi");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var List = _react2.default.createClass({
-    displayName: "List",
+  displayName: "List",
 
-    getInitialState: function getInitialState() {
-        return {
-            products: [],
-            totalPages: 1,
-            page: 0,
-            shouldUpdate: true
-        };
-    },
+  calculateState: function calculateState(props) {
+    var scroll = this.refs.scrollable.scrollTop;
+    var elementHeight = props.elementHeight;
+    var tableHeight = props.tableHeight;
 
-    fetchData: function fetchData(per_page) {
-        var _this = this;
 
-        (0, _ProductsApi.all)(this.state.page, per_page).then(function (data) {
-            _this.setState({ products: [].concat(_toConsumableArray(_this.state.products), _toConsumableArray(data.products)), shouldUpdate: false, totalPages: data.total_pages });
-        });
-    },
+    var visible = Math.floor(tableHeight / elementHeight);
+    var visibleStart = Math.floor(scroll / elementHeight);
+    var visibleEnd = Math.min(visibleStart + visible, props.products.length - 1);
 
-    componentWillMount: function componentWillMount() {
-        this.fetchData();
-    },
+    var displayStart = Math.max(0, visibleStart - visible * 1.2);
+    var displayEnd = Math.min(displayStart + 2 * visible, props.products.length - 1);
 
-    componentDidUpdate: function componentDidUpdate(prevState) {
-        if (this.state.shouldUpdate != prevState.shouldUpdate && this.state.page != prevState.page && this.state.shouldUpdate) {
-            this.fetchData();
-        }
-    },
+    return {
+      visibleStart: visibleStart,
+      visibleEnd: visibleEnd,
+      displayStart: displayStart,
+      displayEnd: displayEnd,
+      products: props.products.slice(displayStart, displayEnd)
+    };
+  },
 
-    handleScroll: function handleScroll() {
-        var product = this.refs.products;
-        var page = Number(this.state.page);
-        var visible = Math.floor(this.props.tableHeight / this.props.elementHeight);
-        var total = this.state.products.length;
-        var scrolled = Math.floor(product.scrollTop / this.props.elementHeight);
+  getInitialState: function getInitialState() {
+    var visible = Math.floor(this.props.tableHeight / this.props.elementHeight);
 
-        if (scrolled >= total - visible && page < this.state.totalPages) {
-            this.setState({ page: page + 1, shouldUpdate: true });
-        }
-    },
+    return {
+      products: [],
+      visibleStart: 0,
+      visibleEnd: +this.props.elementHeight,
+      displayStart: 0,
+      displayEnd: visible * 2
+    };
+  },
 
-    render: function render() {
-        var _this2 = this;
+  componentDidMount: function componentDidMount() {
+    this.setState(this.calculateState(this.props));
+  },
 
-        var elements = this.state.products.map(function (p, i) {
-            return _react2.default.createElement(_ElementReact2.default, { key: p.id, i: i, product: p, height: _this2.props.elementHeight });
-        });
-
-        return _react2.default.createElement(
-            "div",
-            { className: "wrapper" },
-            _react2.default.createElement(
-                "table",
-                { className: "table heading" },
-                _react2.default.createElement(
-                    "thead",
-                    null,
-                    _react2.default.createElement(
-                        "tr",
-                        null,
-                        _react2.default.createElement(
-                            "th",
-                            null,
-                            "Name"
-                        ),
-                        _react2.default.createElement(
-                            "th",
-                            null,
-                            "Sku"
-                        ),
-                        _react2.default.createElement(
-                            "th",
-                            null,
-                            "Price"
-                        )
-                    )
-                )
-            ),
-            _react2.default.createElement(
-                "div",
-                { style: { height: this.props.tableHeight + "px" }, className: "products", ref: "products", onScroll: this.handleScroll },
-                _react2.default.createElement(
-                    "table",
-                    { className: "table" },
-                    _react2.default.createElement(
-                        "tbody",
-                        null,
-                        elements
-                    )
-                )
-            )
-        );
+  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+    if (nextProps.products.length != this.state.products.length) {
+      this.setState(this.calculateState(nextProps));
     }
+  },
+
+  handleScroll: function handleScroll() {
+    var state = this.calculateState(this.props);
+
+    if (!(state.visibleStart >= this.state.displayStart && state.visibleEnd <= this.state.displayEnd)) this.props.onScroll();
+
+    this.setState(state);
+  },
+
+  render: function render() {
+    var _this = this;
+
+    var _state = this.state;
+    var displayStart = _state.displayStart;
+    var displayEnd = _state.displayEnd;
+
+
+    var topHeight = displayStart * this.props.elementHeight;
+    var bottomHeight = (this.props.products.length - displayEnd) * this.props.elementHeight;
+
+    var elements = this.state.products.map(function (p, i) {
+      return _react2.default.createElement(_ElementReact2.default, { key: p.id, i: i, product: p, height: _this.props.elementHeight });
+    });
+
+    return _react2.default.createElement(
+      "div",
+      { style: { height: this.props.tableHeight + "px" }, className: "products", ref: "scrollable", onScroll: this.handleScroll },
+      _react2.default.createElement(
+        "table",
+        { className: "table" },
+        _react2.default.createElement(
+          "tbody",
+          null,
+          _react2.default.createElement(
+            "tr",
+            { key: "top", style: { height: topHeight + "px" } },
+            _react2.default.createElement("td", { colSpan: "20" })
+          ),
+          elements,
+          _react2.default.createElement(
+            "tr",
+            { key: "bottom", style: { height: bottomHeight + "px" } },
+            _react2.default.createElement("td", { colSpan: "20" })
+          )
+        )
+      )
+    );
+  }
 });
 
 exports.default = List;
+});
+
+require.register("src/components/Search.react.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Search = _react2.default.createClass({
+  displayName: "Search",
+
+  render: function render() {
+    return _react2.default.createElement(
+      "div",
+      { className: "search" },
+      _react2.default.createElement("input", { type: "text", ref: "search", onInput: this.props.handleInput }),
+      _react2.default.createElement(
+        "label",
+        null,
+        "Search Products"
+      )
+    );
+  }
+});
+
+Search.propTypes = {
+  handleInput: _react2.default.PropTypes.func
+};
+
+exports.default = Search;
 });
 
 require.register("src/init.js", function(exports, require, module) {
@@ -20737,16 +20889,120 @@ var _reactDom = require("react-dom");
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _ListReact = require("./components/List.react.jsx");
+var _GridReact = require("./components/Grid.react.jsx");
 
-var _ListReact2 = _interopRequireDefault(_ListReact);
+var _GridReact2 = _interopRequireDefault(_GridReact);
+
+var _store = require("./store");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_reactDom2.default.render(_react2.default.createElement(_ListReact2.default, { tableHeight: "300", elementHeight: "40" }), document.querySelector("#products_container"));
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function productList() {
+  var state = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+  var action = arguments[1];
+
+  if (action.type == 'GET_PRODUCTS') return [].concat(_toConsumableArray(state), _toConsumableArray(action.payload.products));else if (action.type == 'SEARCH_PRODUCTS') return [].concat(_toConsumableArray(action.payload.products));
+  return state;
+}
+
+function page() {
+  var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+  var action = arguments[1];
+
+  if (action.type == 'GET_PRODUCTS') return action.page;else if (action.type == 'SEARCH_PRODUCTS') return 0;
+  return state;
+}
+
+function totalPages() {
+  var state = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+  var action = arguments[1];
+
+  if (['GET_PRODUCTS', 'SEARCH_PRODUCTS'].includes(action.type)) return action.payload.total_pages;
+
+  return state;
+}
+
+var productApp = (0, _store.combineReducers)({
+  productList: productList,
+  totalPages: totalPages,
+  page: page
 });
 
-require.alias("process/browser.js", "process");
+var store = (0, _store.createStore)(productApp, {});
+
+var render = function render() {
+  var state = store.getState();
+  _reactDom2.default.render(_react2.default.createElement(_GridReact2.default, {
+    tableHeight: "300",
+    elementHeight: "40",
+    page: state.page,
+    products: state.productList,
+    totalPages: state.totalPages,
+    dispatch: store.dispatch }), document.querySelector("#products_container"));
+};
+
+store.subscribe(render);
+render();
+});
+
+;require.register("src/store.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var defaultStore = {};
+
+var createStore = exports.createStore = function createStore(reducer, initalState) {
+  var state = initalState;
+  var listeners = [];
+
+  var getState = function getState() {
+    return state;
+  };
+
+  var dispatch = function dispatch(action) {
+    state = reducer(state, action);
+    listeners.forEach(function (l) {
+      return l();
+    });
+  };
+
+  var subscribe = function subscribe(listener) {
+    listeners.push(listener);
+
+    return function () {
+      listener.filter(function (l) {
+        return l !== listener;
+      });
+    };
+  };
+
+  dispatch({});
+
+  return {
+    getState: getState,
+    dispatch: dispatch,
+    subscribe: subscribe
+  };
+};
+
+var combineReducers = exports.combineReducers = function combineReducers(reducers) {
+  return function () {
+    var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var action = arguments[1];
+
+    return Object.keys(reducers).reduce(function (acc, r) {
+      acc[r] = reducers[r](state[r], action);
+      return acc;
+    }, {});
+  };
+};
+});
+
+;require.alias("process/browser.js", "process");
 require.alias("react/react.js", "react");process = require('process');require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');

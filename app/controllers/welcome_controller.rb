@@ -1,13 +1,9 @@
 class WelcomeController < ApplicationController
   def index
     remote_ip = request.remote_ip
-    @verified = verify_user_cookies(remote_ip)
+    User.find_or_create_by!(remote_ip: remote_ip)
 
-    if !@verified
-      @user = User.find_or_create_by!(remote_ip: remote_ip)
-      @captcha = Textcaptcha.get_captcha("example")
-      save_answer_in_cookie(@captcha["a"])
-    end
+    @verified = verify_user_cookies(remote_ip)
   end
 
   def verify
@@ -22,6 +18,11 @@ class WelcomeController < ApplicationController
       set_cookies(@user.session_id)
     end
     redirect_to root_url
+  end
+
+  def human
+    @captcha = Textcaptcha.get_captcha("example")
+    save_answer_in_cookie(@captcha["a"])
   end
 
   private

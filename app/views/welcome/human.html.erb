@@ -1,0 +1,9 @@
+<div class="text-center center-container">
+  <div class="inner question">
+    <%= @captcha["q"] %>
+    <%= form_tag(verify_path, method: :post, class: 'captcha-form') do %>
+      <%= text_field_tag :answer %>
+      <%= submit_tag "verify", class: "btn btn-large btn-primary" %>
+    <% end %>
+  </div>
+</div>
